@@ -1,9 +1,11 @@
 ﻿using frontendnet.Models;
 using frontendnet.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace frontendnet;
 
+[Authorize(Roles = "Administrador, Usuario")]
 public class ArchivosController(ArchivosClientService archivos, IConfiguration configuration) : Controller
 {
     public async Task<IActionResult> Index()

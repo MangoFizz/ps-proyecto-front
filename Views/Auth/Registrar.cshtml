@@ -1,12 +1,12 @@
-@model Login
+@model RegisterUser
 @{
-    ViewData["Title"] = "Inicio de sesión";
+    ViewData["Title"] = "Registrar cuenta de usuario";
 }
 
-<form asp-action="Index">
+<form asp-action="Registrar">
     <div class="card mx-auto" style="max-width: 500px;">
         <div class="card-body">
-            <h1 class="h3 text-center text-danger">Bienvenido a .Netflix</h1>
+            <h1 class="h3 text-center text-danger">Comienza en .Netflix</h1>
             <h5 class="card-card-title text-center mt-4">@ViewData["Title"]</h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-floating mb-3">
@@ -19,10 +19,15 @@
                 <label asp-for="Password" class="form-label"></label>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            <p class="card-text small">¿No tienes una cuenta? <a asp-action="Registrar" asp-controller="Auth">Regístrate</a></p>
+            <div class="form-floating mb-3">
+                <input asp-for="Nombre" placeholder="Nombre" class="form-control" />
+                <label asp-for="Nombre" class="form-label"></label>
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <p class="card-text small">¿Ya tienes una cuenta? <a asp-action="" asp-controller="Auth">Inicia sesión</a></p>
         </div>
         <div class="card-footer text-center">
-            <button type="submit" class="btn btn-danger">Iniciar sesión</button>
+            <button type="submit" class="btn btn-danger">Registrar</button>
         </div>
     </div>
 </form>

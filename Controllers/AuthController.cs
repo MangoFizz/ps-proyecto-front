@@ -16,6 +16,18 @@ public class AuthController(AuthClientService auth) : Controller
         return View();
     }
 
+    [AllowAnonymous]
+    public IActionResult Registrar()
+    {
+        return View();
+    }
+
+    [Authorize(Roles = "NoVerificado")]
+    public IActionResult VerificarCorreo()
+    {
+        return View();
+    }
+
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
@@ -36,8 +48,13 @@ public class AuthController(AuthClientService auth) : Controller
                         new(ClaimTypes.Role, token.Rol),
                     };
                 auth.IniciaSesionAsync(claims);
-                // Usuario válido, lo envía a la lista de Peliculas
-                return RedirectToAction("Index", "Peliculas");
+                
+                // Si el usuario es válido y tiene un rol diferente a NoVerificado, se redirige a la página principal
+                if (token.Rol != "NoVerificado")
+                    return RedirectToAction("Index", "Peliculas");
+                
+                // Sino, se redirige a la página de verificación de correo
+                return RedirectToAction("VerificarCorreo", "Auth");
             }
             catch (Exception)
             {
@@ -47,7 +64,76 @@ public class AuthController(AuthClientService auth) : Controller
         return View(model);
     }
 
-    [Authorize(Roles = "Administrador, Usuario")]
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegistrarAsync(RegisterUser model)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                // Crea un nuevo usuario
+                var resultado = await auth.RegistrarUsuarioAsync(model);
+                if (resultado)
+                {
+                    // Usuario creado, iniciar sesión
+                    var token = await auth.ObtenTokenAsync(model.Email, model.Password);
+                    var claims = new List<Claim>
+                    {
+                        new(ClaimTypes.Name, token.Email ?? string.Empty),
+                        new(ClaimTypes.GivenName, token.Nombre ?? string.Empty),
+                        new("jwt", token.Jwt ?? string.Empty),
+                        new(ClaimTypes.Role, token.Rol ?? string.Empty),
+                    };
+
+                    auth.IniciaSesionAsync(claims);
+
+                    // Usuario válido, ir a la verificación de correo
+                    return RedirectToAction("VerificarCorreo", "Auth");
+                }
+                else
+                {
+                    ModelState.AddModelError("Email", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
+                }
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("Email", "Credenciales no válidas. Inténtelo nuevamente.");
+            }
+        }
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "NoVerificado")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerificarCorreo(UserOTP model)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                // Verifica el código OTP
+                var resultado = await auth.VerificarCorreoAsync(model);
+                if (resultado)
+                {
+                    return RedirectToAction("Index", "Auth");
+                }
+                else
+                {
+                    ModelState.AddModelError("Code", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
+                }
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("Email", "Credenciales no válidas. Inténtelo nuevamente.");
+            }
+        }
+        return View(model);
+    }
+
+    [Authorize(Roles = "Administrador, Usuario, NoVerificado")]
     public async Task<IActionResult> SalirAsync()
     {
         // Cierra la sesión

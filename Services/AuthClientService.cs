@@ -23,4 +23,16 @@ public class AuthClientService(HttpClient client, IHttpContextAccessor httpConte
         var authProperties = new AuthenticationProperties();
         await httpContextAccessor.HttpContext?.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties)!;
     }
+
+    public async Task<bool> RegistrarUsuarioAsync(RegisterUser usuario)
+    {
+        var response = await client.PostAsJsonAsync("api/auth/register", usuario);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> VerificarCorreoAsync(UserOTP usuario)
+    {
+        var response = await client.PostAsJsonAsync("api/auth/verify", usuario);
+        return response.IsSuccessStatusCode;
+    }
 }

@@ -1,9 +1,11 @@
 ﻿using frontendnet.Models;
 using frontendnet.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace frontendnet;
 
+[Authorize(Roles = "Administrador")]
 public class BitacoraController(BitacoraClientService bitacora) : Controller
 {
     public async Task<IActionResult> IndexAsync()

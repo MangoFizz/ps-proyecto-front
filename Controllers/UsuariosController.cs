@@ -155,6 +155,7 @@ public class UsuariosController(UsuariosClientService usuarios, RolesClientServi
     private async Task RolesDropDownListAsync(object? rolSeleccionado = null)
     {
         var listado = await roles.GetAsync();
+        listado.RemoveAll(r => r.Nombre == "NoVerificado");
         ViewBag.Rol = new SelectList(listado, "Nombre", "Nombre", rolSeleccionado);
     }
 }
